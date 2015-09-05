@@ -1,0 +1,6 @@
+*~
+*#
+*.fasl
+#.fas
+#.dx32fsl
+#.dx64fsl
