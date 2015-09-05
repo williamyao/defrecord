@@ -1,4 +1,4 @@
-;;;; Simpler class definitions.
+;;;; Simpler record specification.
 
 (in-package #:common-lisp-user)
 (defpackage #:defrecord/asdf

@@ -1,4 +1,4 @@
-;;;; Simpler class definitions.
+;;;; Simpler record specification.
 
 (defpackage #:defrecord
   (:use #:cl)
