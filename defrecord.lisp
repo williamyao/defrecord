@@ -26,30 +26,30 @@ Defines:
 * a shallow copy method on COPY-RECORD, including shallow copy
   of all superrecord slots"
   (destructuring-bind (slot-names default-values)
-	    (or (and slots (transpose (map 'list #'normalize-slot slots)))
-		(list nil nil)) ; Handles the case of no slots gracefully.(
+      (or (and slots (transpose (map 'list #'normalize-slot slots)))
+          (list nil nil))  ; Handles the case of no slots gracefully.(
     (let* ((slot-names (map 'list #'string slot-names))
-	   (slot-symbols (map 'list #'intern slot-names))
-	   (slot-keywords (map 'list
-			       #'(lambda (x) (intern x :keyword))
-			       slot-names)))
+           (slot-symbols (map 'list #'intern slot-names))
+           (slot-keywords (map 'list
+                               #'(lambda (x) (intern x :keyword))
+                               slot-names)))
       `(progn
-	 ,(record-defclass-form name
-				superrecords
-				slot-symbols
-				slot-keywords
-				default-values)
-	 ,(record-%copy-record-form name slot-symbols)
-	 ,(record-copy-record-form name)
-	 ,(record-boa-constructor-form name slot-symbols slot-keywords)
-	 ',name))))
+         ,(record-defclass-form name
+                                superrecords
+                                slot-symbols
+                                slot-keywords
+                                default-values)
+         ,(record-%copy-record-form name slot-symbols)
+         ,(record-copy-record-form name)
+         ,(record-boa-constructor-form name slot-symbols slot-keywords)
+         ',name))))
 
 (defun copy-with (record &rest symbols-and-values)
   "Return a copy of RECORD with the slots specified bound to 
 different values."
   (let ((copy (copy-record record)))
     (loop for (symbol value) on symbols-and-values by #'cddr
-	  do (setf (slot-value copy symbol) value))
+          do (setf (slot-value copy symbol) value))
     copy))
 
 (defgeneric copy-record (record)
@@ -60,24 +60,24 @@ same class."))
 
 
 (defun record-defclass-form (name
-			     superrecords
-			     slot-symbols
-			     slot-keywords
-			     default-values)
+                             superrecords
+                             slot-symbols
+                             slot-keywords
+                             default-values)
   `(defclass ,name ,(if superrecords superrecords '(record))
      ,(loop for slot-symbol in slot-symbols
-	    for slot-keyword in slot-keywords
-	    for default-value in default-values
-	    collect `(,slot-symbol
-		      :reader ,slot-symbol
-		      :initarg  ,slot-keyword
-		      :initform ,default-value))))
+            for slot-keyword in slot-keywords
+            for default-value in default-values
+            collect `(,slot-symbol
+                      :reader ,slot-symbol
+                      :initarg  ,slot-keyword
+                      :initform ,default-value))))
 
 (defun record-%copy-record-form (name slot-symbols)
   `(defmethod %copy-record progn ((record ,name) (instance ,name))
      ,@(loop for slot-symbol in slot-symbols
-	     collect `(setf (slot-value instance ',slot-symbol)
-			    (slot-value record   ',slot-symbol)))))
+             collect `(setf (slot-value instance ',slot-symbol)
+                            (slot-value record   ',slot-symbol)))))
 
 (defun record-copy-record-form (name)
   `(defmethod copy-record ((record ,name))
@@ -88,10 +88,10 @@ same class."))
 (defun record-boa-constructor-form (name slot-symbols slot-keywords)
   `(defun ,name ,slot-symbols
      (make-instance ',name
-		    ,@(alexandria:mappend
-		       (lambda (symbol keyword) (list symbol keyword))
-		       slot-keywords
-		       slot-symbols))))
+                    ,@(alexandria:mappend
+                       (lambda (symbol keyword) (list symbol keyword))
+                       slot-keywords
+                       slot-symbols))))
 
 (defun transpose (list) (apply #'map 'list #'list list))
 (defun normalize-slot (slot) (if (listp slot) slot (list slot nil)))
