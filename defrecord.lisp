@@ -27,7 +27,7 @@ Defines:
   of all superrecord slots"
   (destructuring-bind (slot-names default-values)
       (or (and slots (transpose (map 'list #'normalize-slot slots)))
-          (list nil nil))  ; Handles the case of no slots gracefully.(
+          (list nil nil))  ; Handles the case of no slots gracefully.
     (let* ((slot-names (map 'list #'string slot-names))
            (slot-symbols (map 'list #'intern slot-names))
            (slot-keywords (map 'list
@@ -42,6 +42,7 @@ Defines:
          ,(record-%copy-record-form name slot-symbols)
          ,(record-copy-record-form name)
          ,(record-boa-constructor-form name slot-symbols slot-keywords)
+         ,(record-printer-form name slot-symbols)
          ',name))))
 
 (defun copy-with (record &rest symbols-and-values)
@@ -92,6 +93,13 @@ same class."))
                        (lambda (symbol keyword) (list symbol keyword))
                        slot-keywords
                        slot-symbols))))
+
+(defun record-printer-form (name slot-symbols)
+  `(defmethod print-object ((obj ,name) stream)
+     (print-unreadable-object (obj stream :type t :identity nil)
+       (format stream "~@{~{:~A ~S~}~^ ~}"
+               ,@(loop for sym in slot-symbols
+                       collect `(list ',sym (slot-value obj ',sym)))))))
 
 (defun transpose (list) (apply #'map 'list #'list list))
 (defun normalize-slot (slot) (if (listp slot) slot (list slot nil)))
